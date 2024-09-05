@@ -1,5 +1,6 @@
 package com.weatherapp.ui
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +17,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.weatherapp.R
+import com.weatherapp.model.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun HomePage() {
+fun HomePage(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel,
+    context: Context
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
