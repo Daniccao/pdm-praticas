@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val viewModel : MainViewModel by viewModels()
         setContent {
+            if (!viewModel.loggedIn) {
+                this.finish()
+            }
             val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
             val context = LocalContext.current
@@ -64,7 +67,6 @@ class MainActivity : ComponentActivity() {
                             actions = {
                                 IconButton( onClick = {
                                     Firebase.auth.signOut()
-                                    finish()
                                 } ) {
                                     Icon(
                                         imageVector = Icons.Filled.ExitToApp,
