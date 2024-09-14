@@ -29,6 +29,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.weatherapp.db.fb.FBDatabase
+import com.weatherapp.model.City
 import com.weatherapp.model.MainViewModel
 import com.weatherapp.ui.CityDialog
 import com.weatherapp.ui.nav.BottomNavBar
@@ -45,6 +47,7 @@ class MainActivity : ComponentActivity() {
             if (!viewModel.loggedIn) {
                 this.finish()
             }
+            val fbDB = remember { FBDatabase (viewModel) }
             val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
             val context = LocalContext.current
@@ -57,13 +60,13 @@ class MainActivity : ComponentActivity() {
                 if (showDialog) CityDialog(
                     onDismiss = { showDialog = false },
                     onConfirm = { city ->
-                        if (city.isNotBlank()) viewModel.add(city)
+                        if (city.isNotBlank()) fbDB.add(City(name = city, weather = ""))
                         showDialog = false
                     })
                 Scaffold(
                     topBar = {
                         TopAppBar(
-                            title = { Text("Bem-vindo/a!") },
+                            title = { Text("Bem-vindo/a ${viewModel.user.name}") },
                             actions = {
                                 IconButton( onClick = {
                                     Firebase.auth.signOut()
@@ -90,7 +93,7 @@ class MainActivity : ComponentActivity() {
                         innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
                         launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                        MainNavHost(navController = navController, viewModel = viewModel, context = context)
+                        MainNavHost(navController = navController, viewModel = viewModel, context = context, fbDB = fbDB)
                     }
                 }
             }

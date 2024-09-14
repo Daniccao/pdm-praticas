@@ -20,6 +20,8 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.weatherapp.db.fb.FBDatabase
+import com.weatherapp.model.City
 import com.weatherapp.model.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,7 +30,8 @@ import com.weatherapp.model.MainViewModel
 fun MapPage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
-    context: Context
+    context: Context,
+    fbDB: FBDatabase
 ) {
     val camPosState = rememberCameraPositionState ()
     val recife = LatLng(-8.05, -34.9)
@@ -43,7 +46,9 @@ fun MapPage(
     }
     GoogleMap (
         modifier = Modifier.fillMaxSize(),
-        onMapClick = { viewModel.add("Nova cidade", location = it) },
+        onMapClick = {
+            fbDB.add(City(name = it.latitude.toString()+it.longitude.toString(), weather = "", location = it))
+            },
         cameraPositionState = camPosState,
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
         uiSettings = MapUiSettings(myLocationButtonEnabled = true)
