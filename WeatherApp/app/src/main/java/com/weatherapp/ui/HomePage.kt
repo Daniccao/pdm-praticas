@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.weatherapp.R
+import com.weatherapp.db.fb.FBDatabase
 import com.weatherapp.model.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +26,8 @@ import com.weatherapp.model.MainViewModel
 fun HomePage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
-    context: Context
+    context: Context,
+    fbDB: FBDatabase
 ) {
     Column(
         modifier = Modifier
