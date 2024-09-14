@@ -19,6 +19,10 @@ class MainViewModel : ViewModel() {
         _cities.add(City(city, "Carregando clima...", location))
     }
 
+    private val _user = mutableStateOf(User("", ""))
+    val user : User
+        get() = _user.value
+
     private var _loggedIn = mutableStateOf(false)
     val loggedIn : Boolean
         get() = _loggedIn.value
@@ -35,11 +39,6 @@ class MainViewModel : ViewModel() {
     }
 }
 
-data class City(
-    val name: String,
-    var weather: String,
-    var location: LatLng? = null
-)
 
 private fun getCities() = List(30) { i ->
     City(name = "Cidade $i"
