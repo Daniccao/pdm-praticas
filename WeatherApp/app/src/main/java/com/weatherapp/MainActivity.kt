@@ -32,6 +32,7 @@ import com.google.firebase.auth.auth
 import com.weatherapp.db.fb.FBDatabase
 import com.weatherapp.model.City
 import com.weatherapp.model.MainViewModel
+import com.weatherapp.repo.Repository
 import com.weatherapp.ui.CityDialog
 import com.weatherapp.ui.nav.BottomNavBar
 import com.weatherapp.ui.nav.BottomNavItem
@@ -47,7 +48,7 @@ class MainActivity : ComponentActivity() {
             if (!viewModel.loggedIn) {
                 this.finish()
             }
-            val fbDB = remember { FBDatabase (viewModel) }
+            val repo = remember { Repository (viewModel) }
             val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
             val context = LocalContext.current
@@ -59,8 +60,9 @@ class MainActivity : ComponentActivity() {
             WeatherAppTheme {
                 if (showDialog) CityDialog(
                     onDismiss = { showDialog = false },
-                    onConfirm = { city ->
-                        if (city.isNotBlank()) fbDB.add(City(name = city, weather = ""))
+                    onConfirm = { cityName ->
+                        if (cityName.isNotBlank())
+                            repo.addCity(name = cityName)
                         showDialog = false
                     })
                 Scaffold(
@@ -93,7 +95,7 @@ class MainActivity : ComponentActivity() {
                         innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
                         launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                        MainNavHost(navController = navController, viewModel = viewModel, context = context, fbDB = fbDB)
+                        MainNavHost(navController = navController, viewModel = viewModel, context = context, repo = repo)
                     }
                 }
             }
