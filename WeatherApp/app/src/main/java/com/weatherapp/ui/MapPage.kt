@@ -23,6 +23,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.weatherapp.db.fb.FBDatabase
 import com.weatherapp.model.City
 import com.weatherapp.model.MainViewModel
+import com.weatherapp.repo.Repository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -31,12 +32,9 @@ fun MapPage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     context: Context,
-    fbDB: FBDatabase
+    repo: Repository
 ) {
     val camPosState = rememberCameraPositionState ()
-    val recife = LatLng(-8.05, -34.9)
-    val caruaru = LatLng(-8.27, -35.98)
-    val joaopessoa = LatLng(-7.12, -34.84)
     val hasLocationPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context,
@@ -47,7 +45,7 @@ fun MapPage(
     GoogleMap (
         modifier = Modifier.fillMaxSize(),
         onMapClick = {
-            fbDB.add(City(name = it.latitude.toString()+it.longitude.toString(), weather = "", location = it))
+            repo.addCity(lat = it.latitude, lng = it.longitude)
             },
         cameraPositionState = camPosState,
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
@@ -59,26 +57,5 @@ fun MapPage(
                     title = it.name, snippet = "${it.location}")
             }
         }
-        Marker(
-            state = MarkerState(position = recife),
-            title = "Recife",
-            snippet = "Marcador em Recife",
-            icon = BitmapDescriptorFactory.defaultMarker(
-                BitmapDescriptorFactory.HUE_BLUE)
-        )
-        Marker(
-            state = MarkerState(position = caruaru),
-            title = "Caruaru",
-            snippet = "Marcador em Caruaru",
-            icon = BitmapDescriptorFactory.defaultMarker(
-                BitmapDescriptorFactory.HUE_GREEN)
-        )
-        Marker(
-            state = MarkerState(position = joaopessoa),
-            title = "João Pessoa",
-            snippet = "Marcador em João Pessoa",
-            icon = BitmapDescriptorFactory.defaultMarker(
-                BitmapDescriptorFactory.HUE_RED)
-        )
     }
 }
