@@ -51,6 +51,9 @@ fun ListPage(
             .padding(8.dp)
     ) {
         items(cityList) { city ->
+            if (city.weather == null) {
+                repo.loadWeather(city)
+            }
             CityItem(city = city,
                 onClose = { repo.remove(city) },
                 onClick = { city:City ->
@@ -84,7 +87,7 @@ fun CityItem(
                 text = city.name,
                 fontSize = 24.sp)
             Text(modifier = Modifier,
-                text = city.weather.toString(),
+                text = city.weather?.desc?:"carregando...",
                 fontSize = 16.sp)
         }
         IconButton(onClick = onClose) {
