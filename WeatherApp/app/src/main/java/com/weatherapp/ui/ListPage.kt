@@ -29,10 +29,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.weatherapp.db.fb.FBDatabase
 import com.weatherapp.model.City
 import com.weatherapp.model.MainViewModel
 import com.weatherapp.repo.Repository
+import com.weatherapp.ui.nav.BottomNavItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -41,7 +43,8 @@ fun ListPage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     context: Context,
-    repo: Repository
+    repo: Repository,
+    navCtrl: NavHostController
 ) {
     val cityList = viewModel.cities
 
@@ -51,10 +54,21 @@ fun ListPage(
             .padding(8.dp)
     ) {
         items(cityList) { city ->
+            if (city.weather == null) {
+                repo.loadWeather(city)
+            }
             CityItem(city = city,
                 onClose = { repo.remove(city) },
-                onClick = { city:City ->
-                Toast.makeText(context, "${city.name}!", Toast.LENGTH_LONG).show()
+                onClick = {
+                    viewModel.city = city
+                    repo.loadForecast(city)
+                    navCtrl.navigate(BottomNavItem.HomePage.route) {
+                        navCtrl.graph.startDestinationRoute?.let {
+                            popUpTo(it) { saveState = true }
+                            restoreState = true
+                        }
+                        launchSingleTop = true
+                    }
             })
         }
     }
@@ -84,7 +98,7 @@ fun CityItem(
                 text = city.name,
                 fontSize = 24.sp)
             Text(modifier = Modifier,
-                text = city.weather.toString(),
+                text = city.weather?.desc?:"carregando...",
                 fontSize = 16.sp)
         }
         IconButton(onClick = onClose) {

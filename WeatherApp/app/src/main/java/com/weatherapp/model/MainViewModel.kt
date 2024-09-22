@@ -18,6 +18,11 @@ class MainViewModel : ViewModel(), Repository.Listener {
     val cities : List<City>
         get() = _cities.values.toList()
 
+    private var _city = mutableStateOf<City?>(null)
+    var city: City?
+        get() = _city.value
+        set(tmp) { _city = mutableStateOf(tmp?.copy()) }
+
     private val _user = mutableStateOf(User("", ""))
     val user : User
         get() = _user.value
@@ -40,9 +45,12 @@ class MainViewModel : ViewModel(), Repository.Listener {
     override fun onUserLoaded(user: User) { _user.value = user }
     override fun onCityAdded(city: City) { _cities[city.name] = city }
     override fun onCityRemoved(city: City) { _cities.remove(city.name) }
-}
+    override fun onCityUpdated(city: City) {
+        _cities.remove(city.name)
+        _cities[city.name] = city.copy()
 
-private fun getCities() = List(0) { i ->
-    City(name = "Cidade $i"
-        , weather = "Carregando clima...")
+        if (_city.value?.name == city.name) {
+            _city.value = city.copy()
+        }
+    }
 }

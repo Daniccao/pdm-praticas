@@ -22,16 +22,29 @@ class WeatherService {
                     onResponse: (lat:Double?, long:Double?) -> Unit) {
         search(name) { loc -> onResponse (loc?.lat, loc?.lon) }
     }
-    private fun search(query: String, onResponse : (Location?) -> Unit) {
-        val call: Call<List<Location>?> = weatherAPI.search(query)
-        call.enqueue(object : Callback<List<Location>?> {
-            override fun onResponse(call: Call<List<Location>?>,
-                                    response: Response<List<Location>?>) {
-                onResponse(response.body()?.get(0))
+    private fun search(query: String, onResponse : (APILocation?) -> Unit) {
+        val call: Call<List<APILocation>?> = weatherAPI.search(query)
+        enqueue(call) { onResponse.invoke(it?.get(0)) }
+    }
+
+    fun getCurrentWeather(name: String, onResponse: (APICurrentWeather?) -> Unit){
+        val call: Call<APICurrentWeather?> = weatherAPI.currentWeather(name)
+        enqueue(call) { onResponse.invoke(it) }
+    }
+
+    fun getForecast(name: String, onResponse : (APIWeatherForecast?) -> Unit) {
+        val call: Call<APIWeatherForecast?> = weatherAPI.forecast(name)
+        enqueue(call) { onResponse.invoke(it) }
+    }
+
+    private fun <T> enqueue(call : Call<T?>, onResponse : ((T?) -> Unit)? = null){
+        call.enqueue(object : Callback<T?> {
+            override fun onResponse(call: Call<T?>, response: Response<T?>) {
+                val obj: T? = response.body()
+                onResponse?.invoke(obj)
             }
-            override fun onFailure(call: Call<List<Location>?>,t: Throwable) {
+            override fun onFailure(call: Call<T?>, t: Throwable) {
                 Log.w("WeatherApp WARNING", "" + t.message)
-                onResponse(null)
             }
         })
     }
