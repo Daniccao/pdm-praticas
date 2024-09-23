@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.scale
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -51,11 +52,22 @@ fun MapPage(
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
         uiSettings = MapUiSettings(myLocationButtonEnabled = true)
     ) {
-        viewModel.cities.forEach {
-            if (it.location != null) {
-                Marker( state = MarkerState(position = it.location!!),
-                    title = it.name,
-                    snippet = it.weather?.desc?:"Carregando..."
+        viewModel.cities.forEach { city ->
+            if (city.location != null) {
+                var marker = BitmapDescriptorFactory.defaultMarker()
+                if (city.weather == null) {
+                    repo.loadWeather(city)
+                } else if (city.weather!!.bitmap == null) {
+                    repo.loadBitmap(city)
+                } else {
+                    marker = BitmapDescriptorFactory
+                        .fromBitmap(city.weather!!.bitmap!!.scale(200, 200))
+                }
+                Marker(
+                    state = MarkerState(position = city.location!!),
+                    icon = marker,
+                    title = city.name,
+                    snippet = city.weather?.desc?:"carregando..."
                 )
             }
         }
