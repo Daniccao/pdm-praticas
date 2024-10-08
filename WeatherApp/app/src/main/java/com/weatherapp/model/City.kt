@@ -10,5 +10,6 @@ data class City(
     var weather: Weather? = null,
     var forecast: List<Forecast>? = null,
     var img_url: String? = null,
-    var bitmap: Bitmap? = null
+    var bitmap: Bitmap? = null,
+    var isMonitored: Boolean? = false
 )
