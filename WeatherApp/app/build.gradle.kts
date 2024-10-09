@@ -73,6 +73,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.squareup.picasso:picasso:2.8") // Picasso
 
+    implementation(libs.androidx.work.runtime.ktx)
+
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)

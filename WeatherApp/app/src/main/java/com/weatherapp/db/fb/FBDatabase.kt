@@ -76,7 +76,7 @@ class FBDatabase(private val listener: Listener? = null) {
         val uid = auth.currentUser!!.uid
         val fbCity = city.toFBCity()
         val changes = mapOf( "lat" to fbCity.lat, "lng" to fbCity.lng,
-            "monitored" to fbCity.monitored )
+            "monitored" to fbCity.isMonitored )
         db.collection("users").document(uid)
             .collection("cities").document(fbCity.name!!).update(changes)
     }

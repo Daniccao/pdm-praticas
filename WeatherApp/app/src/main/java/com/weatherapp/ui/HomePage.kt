@@ -72,7 +72,7 @@ fun HomePage(
                         modifier = Modifier.size(32.dp)
                             .clickable (enabled = viewModel.city != null) {
                                 repo.update(viewModel.city!!
-                                    .copy(isMonitored = !viewModel.city!!.isMonitored!!)) // Verificar dps
+                                    .copy(isMonitored = !viewModel.city!!.isMonitored)) // Verificar dps
                             }
                     )
                 }
