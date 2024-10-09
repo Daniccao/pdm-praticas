@@ -16,6 +16,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -47,6 +49,8 @@ fun HomePage(
     context: Context,
     repo: Repository
 ) {
+    val icon = if (viewModel.city?.isMonitored ==
+            true) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder // Verificar se ta certo dps
     Column {
         Row {
             AsyncImage(
@@ -58,8 +62,20 @@ fun HomePage(
             val format = DecimalFormat("#.0")
             Column {
                 Spacer(modifier = Modifier.size(20.dp))
-                Text(text = viewModel.city?.name?:"Selecione uma cidade...",
-                    fontSize = 24.sp)
+                Row {
+                    Text(text = viewModel.city?.name?:"Selecione uma cidade...",
+                        fontSize = 24.sp)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "Monitor?",
+                        modifier = Modifier.size(32.dp)
+                            .clickable (enabled = viewModel.city != null) {
+                                repo.update(viewModel.city!!
+                                    .copy(isMonitored = !viewModel.city!!.isMonitored)) // Verificar dps
+                            }
+                    )
+                }
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(text = viewModel.city?.weather?.desc?:"...",
                     fontSize = 20.sp)
@@ -69,11 +85,17 @@ fun HomePage(
                     fontSize = 20.sp)
             }
         }
-        if (viewModel.city == null ||
-            viewModel.city!!.forecast == null) return
-        LazyColumn {
-            items(viewModel.city!!.forecast!!) { forecast ->
-                ForecastItem(forecast, onClick = { }, modifier = modifier )
+        // if (viewModel.city == null ||
+        // viewModel.city!!.forecast == null) return
+        viewModel.city?.forecast?.let { forecasts ->
+            LazyColumn {
+                items(forecasts) { forecast ->
+                    ForecastItem(
+                        forecast = forecast,
+                        onClick = { },
+                        modifier = modifier
+                    )
+                }
             }
         }
     }

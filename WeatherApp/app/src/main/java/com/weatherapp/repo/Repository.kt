@@ -16,6 +16,7 @@ class Repository (private var listener : Listener): FBDatabase.Listener {
         fun onCityAdded(city: City)
         fun onCityRemoved(city: City)
         fun onCityUpdated(city: City)
+        fun onUserSignOut()
     }
     fun addCity(name: String) {
         weatherService.getLocation(name) { lat, lng ->
@@ -28,6 +29,9 @@ class Repository (private var listener : Listener): FBDatabase.Listener {
             fbDb.add( City( name = name?:"NOT_FOUND",
                 location = LatLng(lat, lng)))
         }
+    }
+    fun update(city: City) {
+        fbDb.update(city)
     }
     fun remove(city: City) {
         fbDb.remove(city)
@@ -43,6 +47,12 @@ class Repository (private var listener : Listener): FBDatabase.Listener {
     }
     override fun onCityRemoved(city: City) {
         listener.onCityRemoved(city)
+    }
+    override fun onUserSignOut() {
+        listener.onUserSignOut()
+    }
+    override fun onCityUpdated(city: City) {
+        listener.onCityUpdated(city)
     }
 
     fun loadWeather(city: City) {
