@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,8 +31,10 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.weatherapp.LoginActivity
+import com.weatherapp.db.fb.FBAuth
 import com.weatherapp.db.fb.FBDatabase
 import com.weatherapp.model.User
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -43,6 +46,8 @@ fun RegisterPage(modifier: Modifier = Modifier) {
     var name by rememberSaveable { mutableStateOf("") }
     var passwordConfirmation by rememberSaveable { mutableStateOf("") }
     val activity = LocalContext.current as? Activity
+    val coroutineScope = rememberCoroutineScope()
+    val fbAuth = remember { FBAuth() }
     Column(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -86,18 +91,14 @@ fun RegisterPage(modifier: Modifier = Modifier) {
         Row(modifier = modifier) {
             Button(
                 onClick = {
-                    Firebase.auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(activity!!) { task ->
-                            if (task.isSuccessful) {
-                                fbDB.register(User(name, email))
-                                Toast.makeText(activity,
-                                    "Registro OK!", Toast.LENGTH_LONG).show()
-                                activity.finish()
-                            } else {
-                                Toast.makeText(activity,
-                                    "Registro FALHOU!", Toast.LENGTH_LONG).show()
-                            }
-                        }
+                    coroutineScope.launch {
+                        val success = fbAuth.signUp(email, password)
+                        val msg = if (success) "Registro OK!"
+                        else "Registro FALHOU!"
+                        if (success) fbDB.register(User(name, email))
+                        Toast.makeText(activity, msg,
+                            Toast.LENGTH_LONG).show()
+                    }
                 },
                 enabled = email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty() && passwordConfirmation.isNotEmpty() && password.equals(
                     passwordConfirmation

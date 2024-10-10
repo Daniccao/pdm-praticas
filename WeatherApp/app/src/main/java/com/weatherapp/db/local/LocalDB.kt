@@ -6,27 +6,22 @@ import com.weatherapp.model.City
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LocalDB (context : Context, databaseName : String) {
     private var roomDB : LocalCityDatabase = Room.databaseBuilder(
-        context = context,
-        klass = LocalCityDatabase::class.java,
+        context = context, klass = LocalCityDatabase::class.java,
         name = databaseName
     ).build()
-    private var scope : CoroutineScope = CoroutineScope(Dispatchers.IO)
-    fun insert(city: City) = scope.launch {
+    val cities = roomDB.localCityDao().getCities()
+    suspend fun insert(city: City) = withContext(Dispatchers.IO) {
         roomDB.localCityDao().upsert(city.toLocalCity())
     }
-    fun update(city: City) = scope.launch {
+
+    suspend fun update(city: City) = withContext(Dispatchers.IO) {
         roomDB.localCityDao().upsert(city.toLocalCity())
     }
-    fun delete(city: City) = scope.launch {
+    suspend fun delete(city: City) = withContext(Dispatchers.IO) {
         roomDB.localCityDao().delete(city.toLocalCity())
-    }
-    fun getCities(doSomething : (City) -> Unit) = scope.launch {
-        roomDB.localCityDao().getCities().collect { list ->
-            val mappedList = list.map { it.toCity() }
-            mappedList.forEach { doSomething(it) }
-        }
     }
 }

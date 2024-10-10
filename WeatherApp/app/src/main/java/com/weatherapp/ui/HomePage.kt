@@ -49,12 +49,19 @@ fun HomePage(
     context: Context,
     repo: Repository
 ) {
-    val icon = if (viewModel.city?.isMonitored ==
-            true) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder // Verificar se ta certo dps
+    val city = if (viewModel.city != null)
+        viewModel.cities[viewModel.city] else null
+    val isMonitored = city?.isMonitored == true
+    val icon = if (isMonitored) Icons.Outlined.Favorite
+    else Icons.Outlined.FavoriteBorder
+    if (city != null) {
+        if (city.weather == null) viewModel.loadWeather(city)
+        if (city.forecast == null) viewModel.loadForecast(city)
+    }
     Column {
         Row {
             AsyncImage(
-                model = viewModel.city?.weather?.imgUrl,
+                model = city?.weather?.imgUrl,
                 modifier = Modifier.size(100.dp),
                 error = painterResource(id = R.drawable.loading),
                 contentDescription = "Imagem"
@@ -63,7 +70,7 @@ fun HomePage(
             Column {
                 Spacer(modifier = Modifier.size(20.dp))
                 Row {
-                    Text(text = viewModel.city?.name?:"Selecione uma cidade...",
+                    Text(text = city?.name?:"Selecione uma cidade...",
                         fontSize = 24.sp)
                     Spacer(modifier = Modifier.size(10.dp))
                     Icon(
@@ -71,23 +78,23 @@ fun HomePage(
                         contentDescription = "Monitor?",
                         modifier = Modifier.size(32.dp)
                             .clickable (enabled = viewModel.city != null) {
-                                repo.update(viewModel.city!!
-                                    .copy(isMonitored = !viewModel.city!!.isMonitored)) // Verificar dps
+                                repo.update(city!!
+                                    .copy(isMonitored = !city.isMonitored)) // Verificar dps
                             }
                     )
                 }
                 Spacer(modifier = Modifier.size(10.dp))
-                Text(text = viewModel.city?.weather?.desc?:"...",
+                Text(text = city?.weather?.desc?:"...",
                     fontSize = 20.sp)
                 Spacer(modifier = Modifier.size(10.dp))
-                Text(text = "Temp: " + viewModel.city?.weather?.temp + "℃"
+                Text(text = "Temp: " + city?.weather?.temp + "℃"
                     ,
                     fontSize = 20.sp)
             }
         }
         // if (viewModel.city == null ||
         // viewModel.city!!.forecast == null) return
-        viewModel.city?.forecast?.let { forecasts ->
+        city?.forecast?.let { forecasts ->
             LazyColumn {
                 items(forecasts) { forecast ->
                     ForecastItem(
