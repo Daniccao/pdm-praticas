@@ -32,7 +32,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.weatherapp.api.WeatherService
+import com.weatherapp.db.fb.FBAuth
+import com.weatherapp.db.fb.FBDatabase
+import com.weatherapp.db.local.LocalDB
 import com.weatherapp.model.MainViewModel
+import com.weatherapp.model.MainViewModelFactory
+import com.weatherapp.monitor.ForecastMonitor
 import com.weatherapp.repo.Repository
 import com.weatherapp.ui.CityDialog
 import com.weatherapp.ui.nav.BottomNavBar
@@ -46,20 +52,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val viewModel : MainViewModel by viewModels()
         setContent {
-            if (!viewModel.loggedIn) {
-                this.finish()
+            val fbAuh = remember { FBAuth() }
+            if (fbAuh.currentUser == null) finish()
+            val email = fbAuh.currentUser?.email
+            val fbDB = remember { FBDatabase () }
+            val localDB = remember {LocalDB(this, databaseName = "$email.db")}
+            val service = remember { WeatherService() }
+            val repo = remember { Repository(fbDB, localDB, service) }
+            val monitor = remember { ForecastMonitor(this, repo) }
+            val viewModel : MainViewModel by viewModels {
+                MainViewModelFactory(repo, service)
             }
             val context = LocalContext.current
-            val repo = remember { Repository (context, viewModel) }
-            DisposableEffect (Unit) {
+            DisposableEffect(Unit) {
                 val listener = Consumer<Intent> { intent ->
                     val name = intent.getStringExtra("city")
-                    val city = viewModel.cities.find { it.name == name }
-                    viewModel.city = city
-                    if (city != null) {
-                        repo.loadWeather(city)
-                        repo.loadForecast(city)
-                    }
+                    viewModel.city = name
                 }
                 addOnNewIntentListener(listener)
                 onDispose { removeOnNewIntentListener(listener) }
@@ -82,7 +90,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     topBar = {
                         TopAppBar(
-                            title = { Text("Bem-vindo/a ${viewModel.user.name}") },
+                            title = { Text("Bem-vindo/a ${viewModel.user?.name}") },
                             actions = {
                                 IconButton( onClick = {
                                     Firebase.auth.signOut()

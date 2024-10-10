@@ -52,13 +52,14 @@ fun MapPage(
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
         uiSettings = MapUiSettings(myLocationButtonEnabled = true)
     ) {
-        viewModel.cities.forEach { city ->
+        viewModel.cities.keys.forEach() { cityName ->
+            val city = viewModel.cities[cityName]!!
             if (city.location != null) {
                 var marker = BitmapDescriptorFactory.defaultMarker()
                 if (city.weather == null) {
-                    repo.loadWeather(city)
+                    viewModel.loadWeather(city)
                 } else if (city.weather!!.bitmap == null) {
-                    repo.loadBitmap(city)
+                    viewModel.loadBitmap(city)
                 } else {
                     marker = BitmapDescriptorFactory
                         .fromBitmap(city.weather!!.bitmap!!.scale(200, 200))
