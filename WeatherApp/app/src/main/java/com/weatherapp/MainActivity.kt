@@ -49,7 +49,8 @@ class MainActivity : ComponentActivity() {
             if (!viewModel.loggedIn) {
                 this.finish()
             }
-            val repo = remember { Repository (viewModel) }
+            val context = LocalContext.current
+            val repo = remember { Repository (context, viewModel) }
             DisposableEffect (Unit) {
                 val listener = Consumer<Intent> { intent ->
                     val name = intent.getStringExtra("city")
@@ -65,7 +66,6 @@ class MainActivity : ComponentActivity() {
             }
             val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
-            val context = LocalContext.current
             val currentRoute = navController.currentBackStackEntryAsState()
             val showButton = currentRoute.value?.destination?.route !=
                     BottomNavItem.MapPage.route

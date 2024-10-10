@@ -1,16 +1,19 @@
 package com.weatherapp.repo
 
+import android.content.Context
 import com.google.android.gms.maps.model.LatLng
 import com.weatherapp.api.WeatherService
 import com.weatherapp.db.fb.FBDatabase
+import com.weatherapp.db.local.LocalDB
 import com.weatherapp.model.City
 import com.weatherapp.model.Forecast
 import com.weatherapp.model.User
 import com.weatherapp.model.Weather
 
-class Repository (private var listener : Listener): FBDatabase.Listener {
+class Repository (context : Context, private var listener : Listener): FBDatabase.Listener {
     private var fbDb = FBDatabase (this)
     private var weatherService = WeatherService()
+    private var localDB: LocalDB = LocalDB(context, databaseName = "local.db")
     interface Listener {
         fun onUserLoaded(user: User)
         fun onCityAdded(city: City)
@@ -18,22 +21,31 @@ class Repository (private var listener : Listener): FBDatabase.Listener {
         fun onCityUpdated(city: City)
         fun onUserSignOut()
     }
+    init {
+        localDB.getCities {
+            fbDb.add(it)
+        }
+    }
     fun addCity(name: String) {
         weatherService.getLocation(name) { lat, lng ->
-            fbDb.add(City(name = name,
-                location = LatLng(lat?:0.0, lng?:0.0)))
+            val city = City(name = name, location = LatLng(lat?:0.0, lng?:0.0))
+            localDB.insert(city)
+            fbDb.add(city)
         }
     }
     fun addCity(lat: Double, lng: Double) {
         weatherService.getName(lat, lng) { name ->
-            fbDb.add( City( name = name?:"NOT_FOUND",
-                location = LatLng(lat, lng)))
+            val city = City( name = name?:"NOT_FOUND", location = LatLng(lat, lng))
+            localDB.insert(city)
+            fbDb.add(city)
         }
     }
     fun update(city: City) {
+        localDB.update(city)
         fbDb.update(city)
     }
     fun remove(city: City) {
+        localDB.delete(city)
         fbDb.remove(city)
     }
     fun register(userName: String, email: String) {
